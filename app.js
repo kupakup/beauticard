@@ -259,11 +259,8 @@ function render() {
       ? 'flex-end'
       : 'center';
 
-  // aspect
+  // size meta — width/height set by fitPreview()
   const [w, h] = ASPECT_RATIOS[state.aspect];
-  els.preview.style.aspectRatio = `${w} / ${h}`;
-
-  // size meta
   const outW = Math.round(state.outputSize * (w >= h ? 1 : w / h));
   const outH = Math.round(state.outputSize * (w >= h ? h / w : 1));
   els.previewSize.textContent = `${outW} × ${outH}`;
@@ -278,6 +275,31 @@ function scheduleRender() {
     renderRaf = null;
     render();
   });
+}
+
+// Compute preview width/height in pixels so the aspect ratio is always honored,
+// even when the preview's natural height would exceed the mobile/desktop cap.
+function fitPreview() {
+  const wrapper = els.preview.parentElement;
+  if (!wrapper) return;
+  const cs = getComputedStyle(wrapper);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const innerW = Math.max(0, wrapper.clientWidth - padX);
+  const vh = window.innerHeight / 100;
+  const maxHvh = window.innerWidth < 1024 ? 42 : 70;
+  const maxH = maxHvh * vh;
+
+  const [aspW, aspH] = ASPECT_RATIOS[state.aspect];
+  const ratio = aspW / aspH;
+
+  let w = innerW;
+  let h = w / ratio;
+  if (h > maxH) {
+    h = maxH;
+    w = h * ratio;
+  }
+  els.preview.style.width = `${Math.floor(w)}px`;
+  els.preview.style.height = `${Math.floor(h)}px`;
 }
 
 // ---------- Init: populate UI ----------
@@ -595,6 +617,7 @@ function bindAll() {
     if (!btn) return;
     state.aspect = btn.dataset.aspect;
     setSegActive(els.aspectGroup, state.aspect, 'aspect');
+    fitPreview();
     render();
   });
 
@@ -775,6 +798,13 @@ function init() {
   const ro = new ResizeObserver(scheduleRender);
   ro.observe(els.preview);
 
+  // viewport changes (orientation, browser chrome) → re-fit preview
+  window.addEventListener('resize', () => {
+    fitPreview();
+    scheduleRender();
+  });
+
+  fitPreview();
   render();
 }
 
