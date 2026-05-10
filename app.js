@@ -679,7 +679,7 @@ async function selectUnsplash(photo) {
   const home = `<a href="https://unsplash.com/${utm}" target="_blank" rel="noopener" class="hover:text-slate-700 underline">Unsplash</a>`;
   state.image.attribution = `Photo by ${author} on ${home}`;
 
-  // Show photo immediately, then swap to data-URL once fetched so html2canvas can capture it.
+  // Show photo immediately, then swap to data-URL once fetched so the canvas snapshot can capture it.
   state.image.src = photo.urls.regular;
   render();
   els.unsplashStatus.textContent = 'Загружаю фото…';
@@ -719,14 +719,12 @@ async function download(format) {
     // target dimensions: longer side = outputSize
     const targetW = w >= h ? state.outputSize : Math.round((state.outputSize * w) / h);
     const targetH = w >= h ? Math.round((state.outputSize * h) / w) : state.outputSize;
-    const scale = targetW / rect.width;
+    const pixelRatio = targetW / rect.width;
 
-    const canvas = await html2canvas(els.preview, {
-      scale,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: format === 'jpg' ? '#ffffff' : null,
-      logging: false,
+    const canvas = await htmlToImage.toCanvas(els.preview, {
+      pixelRatio,
+      backgroundColor: format === 'jpg' ? '#ffffff' : undefined,
+      cacheBust: true,
     });
 
     const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
