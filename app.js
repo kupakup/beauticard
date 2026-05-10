@@ -250,8 +250,9 @@ function render() {
     els.previewOverlay.style.background = 'transparent';
   }
 
-  // position
-  els.previewContent.style.alignItems =
+  // vertical position (justify-content on a column flex container)
+  els.previewContent.style.alignItems = '';
+  els.previewContent.style.justifyContent =
     state.position === 'top'
       ? 'flex-start'
       : state.position === 'bottom'
