@@ -59,7 +59,7 @@ const TEMPLATES = [
               lineHeight: 1.1, letterSpacing: -0.03, transform: 'none', italic: false,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 38, weight: 400, opacity: 70, gap: 0.9, letterSpacing: 0, italic: false },
-      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.2 },
+      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.2, gap: 0.9 },
       position: 'bottom',
     },
   },
@@ -73,7 +73,7 @@ const TEMPLATES = [
               lineHeight: 1.0, letterSpacing: -0.03, transform: 'uppercase', italic: false,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 30, weight: 600, opacity: 90, gap: 0.5, letterSpacing: 0.1, italic: false },
-      eyebrowFont: { size: 30, opacity: 90, letterSpacing: 0.3 },
+      eyebrowFont: { size: 30, opacity: 90, letterSpacing: 0.3, gap: 0.6 },
       position: 'center',
     },
   },
@@ -87,7 +87,7 @@ const TEMPLATES = [
               lineHeight: 1.1, letterSpacing: -0.02, transform: 'none', italic: false,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 36, weight: 400, opacity: 75, gap: 1.2, letterSpacing: 0.05, italic: true },
-      eyebrowFont: { size: 26, opacity: 70, letterSpacing: 0.25 },
+      eyebrowFont: { size: 26, opacity: 70, letterSpacing: 0.25, gap: 1.0 },
       position: 'center',
     },
   },
@@ -101,7 +101,7 @@ const TEMPLATES = [
               lineHeight: 1.2, letterSpacing: 0, transform: 'none', italic: true,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 42, weight: 400, opacity: 80, gap: 1.0, letterSpacing: 0.15, italic: false },
-      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.3 },
+      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.3, gap: 1.0 },
       position: 'center',
     },
   },
@@ -115,7 +115,7 @@ const TEMPLATES = [
               lineHeight: 1.1, letterSpacing: -0.02, transform: 'none', italic: false,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 40, weight: 500, opacity: 85, gap: 0.6, letterSpacing: 0, italic: false },
-      eyebrowFont: { size: 30, opacity: 75, letterSpacing: 0.25 },
+      eyebrowFont: { size: 30, opacity: 75, letterSpacing: 0.25, gap: 0.7 },
       position: 'bottom',
     },
   },
@@ -129,7 +129,7 @@ const TEMPLATES = [
               lineHeight: 0.95, letterSpacing: 0.02, transform: 'uppercase', italic: false,
               shadow: false, strokeWidth: 0, strokeColor: '#000000' },
       descFont: { size: 28, weight: 400, opacity: 80, gap: 0.8, letterSpacing: 0.2, italic: false },
-      eyebrowFont: { size: 28, opacity: 75, letterSpacing: 0.35 },
+      eyebrowFont: { size: 28, opacity: 75, letterSpacing: 0.35, gap: 0.8 },
       position: 'center',
     },
   },
@@ -163,7 +163,7 @@ const state = {
     letterSpacing: 0,
     italic: false,
   },
-  eyebrowFont: { size: 32, opacity: 80, letterSpacing: 0.15 },
+  eyebrowFont: { size: 32, opacity: 80, letterSpacing: 0.15, gap: 0.8 },
   bgType: 'gradient',
   gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
   solid: '#6366f1',
@@ -261,6 +261,15 @@ const els = {
   descLetterSpacing: $('#desc-letter-spacing'),
   descLetterSpacingVal: $('#desc-letter-spacing-val'),
   descItalic: $('#desc-italic'),
+
+  eyebrowGap: $('#eyebrow-gap'),
+  eyebrowGapVal: $('#eyebrow-gap-val'),
+  eyebrowSize: $('#eyebrow-size'),
+  eyebrowSizeVal: $('#eyebrow-size-val'),
+  eyebrowOpacity: $('#eyebrow-opacity'),
+  eyebrowOpacityVal: $('#eyebrow-opacity-val'),
+  eyebrowLetterSpacing: $('#eyebrow-letter-spacing'),
+  eyebrowLetterSpacingVal: $('#eyebrow-letter-spacing-val'),
 
   aspectGroup: $('#aspect-group'),
   sizeGroup: $('#size-group'),
@@ -398,7 +407,7 @@ function render() {
   els.previewEyebrow.style.letterSpacing = `${state.eyebrowFont.letterSpacing}em`;
   els.previewEyebrow.style.textTransform = 'uppercase';
   els.previewEyebrow.style.fontWeight = '700';
-  els.previewEyebrow.style.marginBottom = '0.8em';
+  els.previewEyebrow.style.marginBottom = `${state.eyebrowFont.gap}em`;
   els.previewEyebrow.style.lineHeight = '1.2';
 
   // background
@@ -626,6 +635,16 @@ function syncUI() {
   els.descLetterSpacing.value = state.descFont.letterSpacing;
   els.descLetterSpacingVal.textContent = state.descFont.letterSpacing.toFixed(3);
   els.descItalic.checked = state.descFont.italic;
+
+  // eyebrow
+  els.eyebrowGap.value = state.eyebrowFont.gap;
+  els.eyebrowGapVal.textContent = state.eyebrowFont.gap.toFixed(2);
+  els.eyebrowSize.value = state.eyebrowFont.size;
+  els.eyebrowSizeVal.textContent = `${state.eyebrowFont.size}%`;
+  els.eyebrowOpacity.value = state.eyebrowFont.opacity;
+  els.eyebrowOpacityVal.textContent = `${state.eyebrowFont.opacity}%`;
+  els.eyebrowLetterSpacing.value = state.eyebrowFont.letterSpacing;
+  els.eyebrowLetterSpacingVal.textContent = state.eyebrowFont.letterSpacing.toFixed(3);
 
   // format
   setSegActive(els.aspectGroup, state.aspect, 'aspect');
@@ -940,6 +959,28 @@ function bindAll() {
     render();
   });
 
+  // eyebrow controls
+  els.eyebrowGap.addEventListener('input', () => {
+    state.eyebrowFont.gap = +els.eyebrowGap.value;
+    els.eyebrowGapVal.textContent = state.eyebrowFont.gap.toFixed(2);
+    render();
+  });
+  els.eyebrowSize.addEventListener('input', () => {
+    state.eyebrowFont.size = +els.eyebrowSize.value;
+    els.eyebrowSizeVal.textContent = `${state.eyebrowFont.size}%`;
+    render();
+  });
+  els.eyebrowOpacity.addEventListener('input', () => {
+    state.eyebrowFont.opacity = +els.eyebrowOpacity.value;
+    els.eyebrowOpacityVal.textContent = `${state.eyebrowFont.opacity}%`;
+    render();
+  });
+  els.eyebrowLetterSpacing.addEventListener('input', () => {
+    state.eyebrowFont.letterSpacing = +els.eyebrowLetterSpacing.value;
+    els.eyebrowLetterSpacingVal.textContent = state.eyebrowFont.letterSpacing.toFixed(3);
+    render();
+  });
+
   // aspect
   els.aspectGroup.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-aspect]');
@@ -1083,6 +1124,10 @@ async function download(format) {
       pixelRatio,
       backgroundColor: format === 'jpg' ? '#ffffff' : undefined,
       fontEmbedCSS,
+      // Skip the bg <img> when it isn't carrying an Unsplash/file/URL image:
+      // an empty src fires an error inside html-to-image.
+      filter: (node) =>
+        !(node.id === 'preview-bg-img' && state.bgType !== 'image'),
     });
 
     const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
