@@ -51,6 +51,8 @@ const ASPECT_RATIOS = {
 
 const state = {
   text: '',
+  description: '',
+  descFont: { size: 45, weight: 400, opacity: 85, gap: 0.6 },
   bgType: 'gradient',
   gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
   solid: '#6366f1',
@@ -76,11 +78,14 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const els = {
   textInput: $('#text-input'),
+  descInput: $('#desc-input'),
   preview: $('#preview'),
   previewBg: $('#preview-bg'),
   previewOverlay: $('#preview-overlay'),
   previewContent: $('#preview-content'),
   previewText: $('#preview-text'),
+  previewTitle: $('#preview-title'),
+  previewDesc: $('#preview-desc'),
   previewSize: $('#preview-size'),
   previewMeta: $('#preview-meta'),
 
@@ -132,6 +137,14 @@ const els = {
   lineHeightVal: $('#line-height-val'),
   textShadow: $('#text-shadow'),
 
+  descSize: $('#desc-size'),
+  descSizeVal: $('#desc-size-val'),
+  descWeightGroup: $('#desc-weight-group'),
+  descOpacity: $('#desc-opacity'),
+  descOpacityVal: $('#desc-opacity-val'),
+  descGap: $('#desc-gap'),
+  descGapVal: $('#desc-gap-val'),
+
   aspectGroup: $('#aspect-group'),
   sizeGroup: $('#size-group'),
   downloadPng: $('#download-png'),
@@ -174,9 +187,11 @@ function loadFont(family) {
 
 function render() {
   // text
-  els.previewText.textContent = state.text || ' ';
+  els.previewTitle.textContent = state.text || ' ';
+  els.previewDesc.textContent = state.description || '';
+  els.previewDesc.style.display = state.description ? 'block' : 'none';
 
-  // font
+  // font (shared by title and description; description inherits)
   els.previewText.style.fontFamily = `'${state.font.family}', system-ui, sans-serif`;
   els.previewText.style.fontWeight = state.font.weight;
   els.previewText.style.color = state.font.color;
@@ -189,7 +204,14 @@ function render() {
   // text size — % of preview's smaller side, computed from actual rect
   const rect = els.preview.getBoundingClientRect();
   const minDim = Math.min(rect.width, rect.height);
-  els.previewText.style.fontSize = `${(state.font.size * minDim) / 100}px`;
+  const titlePx = (state.font.size * minDim) / 100;
+  els.previewTitle.style.fontSize = `${titlePx}px`;
+  // description: relative size, custom weight/opacity/gap
+  els.previewDesc.style.fontSize = `${(titlePx * state.descFont.size) / 100}px`;
+  els.previewDesc.style.fontWeight = state.descFont.weight;
+  els.previewDesc.style.opacity = state.descFont.opacity / 100;
+  els.previewDesc.style.marginTop = `${state.descFont.gap}em`;
+  els.previewDesc.style.lineHeight = '1.35';
 
   // background
   els.previewBg.style.backgroundImage = '';
@@ -317,6 +339,13 @@ function bindAll() {
   state.text = els.textInput.value;
   els.textInput.addEventListener('input', () => {
     state.text = els.textInput.value;
+    render();
+  });
+
+  // description
+  state.description = els.descInput.value;
+  els.descInput.addEventListener('input', () => {
+    state.description = els.descInput.value;
     render();
   });
 
@@ -532,6 +561,33 @@ function bindAll() {
     render();
   });
 
+  // description: size
+  els.descSize.addEventListener('input', () => {
+    state.descFont.size = +els.descSize.value;
+    els.descSizeVal.textContent = `${state.descFont.size}%`;
+    render();
+  });
+  // description: weight
+  els.descWeightGroup.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-desc-weight]');
+    if (!btn) return;
+    state.descFont.weight = +btn.dataset.descWeight;
+    setSegActive(els.descWeightGroup, state.descFont.weight, 'descWeight');
+    render();
+  });
+  // description: opacity
+  els.descOpacity.addEventListener('input', () => {
+    state.descFont.opacity = +els.descOpacity.value;
+    els.descOpacityVal.textContent = `${state.descFont.opacity}%`;
+    render();
+  });
+  // description: gap
+  els.descGap.addEventListener('input', () => {
+    state.descFont.gap = +els.descGap.value;
+    els.descGapVal.textContent = state.descFont.gap.toFixed(2);
+    render();
+  });
+
   // aspect
   els.aspectGroup.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-aspect]');
@@ -617,13 +673,34 @@ async function searchUnsplash() {
   }
 }
 
-function selectUnsplash(photo) {
-  state.image.src = photo.urls.regular;
+async function selectUnsplash(photo) {
   const utm = '?utm_source=beauticard&utm_medium=referral';
   const author = `<a href="${photo.user.links.html}${utm}" target="_blank" rel="noopener" class="hover:text-slate-700 underline">${photo.user.name}</a>`;
   const home = `<a href="https://unsplash.com/${utm}" target="_blank" rel="noopener" class="hover:text-slate-700 underline">Unsplash</a>`;
   state.image.attribution = `Photo by ${author} on ${home}`;
+
+  // Show photo immediately, then swap to data-URL once fetched so the canvas snapshot can capture it.
+  state.image.src = photo.urls.regular;
   render();
+  els.unsplashStatus.textContent = 'Загружаю фото…';
+
+  try {
+    const res = await fetch(photo.urls.regular, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+    state.image.src = dataUrl;
+    render();
+    els.unsplashStatus.textContent = 'Фото загружено — можно скачивать.';
+  } catch (err) {
+    console.error(err);
+    els.unsplashStatus.textContent = 'Картинка отображается, но скачивание может не сработать из-за CORS.';
+  }
 }
 
 // ---------- Download ----------
@@ -642,14 +719,12 @@ async function download(format) {
     // target dimensions: longer side = outputSize
     const targetW = w >= h ? state.outputSize : Math.round((state.outputSize * w) / h);
     const targetH = w >= h ? Math.round((state.outputSize * h) / w) : state.outputSize;
-    const scale = targetW / rect.width;
+    const pixelRatio = targetW / rect.width;
 
-    const canvas = await html2canvas(els.preview, {
-      scale,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: format === 'jpg' ? '#ffffff' : null,
-      logging: false,
+    const canvas = await htmlToImage.toCanvas(els.preview, {
+      pixelRatio,
+      backgroundColor: format === 'jpg' ? '#ffffff' : undefined,
+      cacheBust: true,
     });
 
     const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
