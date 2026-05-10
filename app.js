@@ -47,16 +47,100 @@ const ASPECT_RATIOS = {
   '1.91:1': [1.91, 1],
 };
 
+// Templates: clicking one patches the state to match.
+const TEMPLATES = [
+  {
+    name: 'Минимал',
+    swatch: 'background: #0f172a; color: #f8fafc;',
+    label: 'Минимал',
+    patch: {
+      bgType: 'solid', solid: '#0f172a',
+      font: { family: 'Inter', size: 9, weight: 900, color: '#ffffff', align: 'left',
+              lineHeight: 1.1, letterSpacing: -0.03, transform: 'none', italic: false,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 38, weight: 400, opacity: 70, gap: 0.9, letterSpacing: 0, italic: false },
+      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.2 },
+      position: 'bottom',
+    },
+  },
+  {
+    name: 'Поп',
+    swatch: 'background: linear-gradient(135deg,#f97316,#ec4899); color: #fff;',
+    label: 'ПОП',
+    patch: {
+      bgType: 'gradient', gradient: { c1: '#f97316', c2: '#ec4899', c3: null, angle: 135 },
+      font: { family: 'Montserrat', size: 13, weight: 900, color: '#ffffff', align: 'center',
+              lineHeight: 1.0, letterSpacing: -0.03, transform: 'uppercase', italic: false,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 30, weight: 600, opacity: 90, gap: 0.5, letterSpacing: 0.1, italic: false },
+      eyebrowFont: { size: 30, opacity: 90, letterSpacing: 0.3 },
+      position: 'center',
+    },
+  },
+  {
+    name: 'Журнал',
+    swatch: 'background: #fef3c7; color: #0f172a;',
+    label: 'Журнал',
+    patch: {
+      bgType: 'solid', solid: '#fef3c7',
+      font: { family: 'Playfair Display', size: 11, weight: 900, color: '#0f172a', align: 'center',
+              lineHeight: 1.1, letterSpacing: -0.02, transform: 'none', italic: false,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 36, weight: 400, opacity: 75, gap: 1.2, letterSpacing: 0.05, italic: true },
+      eyebrowFont: { size: 26, opacity: 70, letterSpacing: 0.25 },
+      position: 'center',
+    },
+  },
+  {
+    name: 'Курсив',
+    swatch: 'background: linear-gradient(180deg,#1e293b,#0f172a); color: #fef3c7;',
+    label: 'Курсив',
+    patch: {
+      bgType: 'gradient', gradient: { c1: '#1e293b', c2: '#0f172a', c3: null, angle: 180 },
+      font: { family: 'Playfair Display', size: 10, weight: 700, color: '#fef3c7', align: 'center',
+              lineHeight: 1.2, letterSpacing: 0, transform: 'none', italic: true,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 42, weight: 400, opacity: 80, gap: 1.0, letterSpacing: 0.15, italic: false },
+      eyebrowFont: { size: 28, opacity: 60, letterSpacing: 0.3 },
+      position: 'center',
+    },
+  },
+  {
+    name: 'Бренд',
+    swatch: 'background: linear-gradient(135deg,#6366f1,#3b82f6); color: #fff;',
+    label: 'Бренд',
+    patch: {
+      bgType: 'gradient', gradient: { c1: '#6366f1', c2: '#3b82f6', c3: null, angle: 135 },
+      font: { family: 'Manrope', size: 10, weight: 700, color: '#ffffff', align: 'left',
+              lineHeight: 1.1, letterSpacing: -0.02, transform: 'none', italic: false,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 40, weight: 500, opacity: 85, gap: 0.6, letterSpacing: 0, italic: false },
+      eyebrowFont: { size: 30, opacity: 75, letterSpacing: 0.25 },
+      position: 'bottom',
+    },
+  },
+  {
+    name: 'Постер',
+    swatch: 'background: linear-gradient(135deg,#92400e,#451a03); color: #fef3c7;',
+    label: 'Постер',
+    patch: {
+      bgType: 'gradient', gradient: { c1: '#92400e', c2: '#451a03', c3: null, angle: 135 },
+      font: { family: 'Bebas Neue', size: 14, weight: 700, color: '#fef3c7', align: 'center',
+              lineHeight: 0.95, letterSpacing: 0.02, transform: 'uppercase', italic: false,
+              shadow: false, strokeWidth: 0, strokeColor: '#000000' },
+      descFont: { size: 28, weight: 400, opacity: 80, gap: 0.8, letterSpacing: 0.2, italic: false },
+      eyebrowFont: { size: 28, opacity: 75, letterSpacing: 0.35 },
+      position: 'center',
+    },
+  },
+];
+
 // ---------- State ----------
 
 const state = {
+  eyebrow: '',
   text: '',
   description: '',
-  descFont: { size: 45, weight: 400, opacity: 85, gap: 0.6 },
-  bgType: 'gradient',
-  gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
-  solid: '#6366f1',
-  image: { src: null, blur: 0, overlay: 0.3, overlayColor: '#000000', attribution: null },
   font: {
     family: 'Inter',
     size: 8,
@@ -65,7 +149,25 @@ const state = {
     align: 'center',
     lineHeight: 1.2,
     shadow: false,
+    letterSpacing: -0.01,
+    transform: 'none',
+    italic: false,
+    strokeWidth: 0,
+    strokeColor: '#000000',
   },
+  descFont: {
+    size: 45,
+    weight: 400,
+    opacity: 85,
+    gap: 0.6,
+    letterSpacing: 0,
+    italic: false,
+  },
+  eyebrowFont: { size: 32, opacity: 80, letterSpacing: 0.15 },
+  bgType: 'gradient',
+  gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
+  solid: '#6366f1',
+  image: { src: null, blur: 0, overlay: 0.3, overlayColor: '#000000', attribution: null },
   position: 'center',
   aspect: '1:1',
   outputSize: 1080,
@@ -77,17 +179,22 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const els = {
+  eyebrowInput: $('#eyebrow-input'),
   textInput: $('#text-input'),
   descInput: $('#desc-input'),
   preview: $('#preview'),
   previewBg: $('#preview-bg'),
+  previewBgImg: $('#preview-bg-img'),
   previewOverlay: $('#preview-overlay'),
   previewContent: $('#preview-content'),
   previewText: $('#preview-text'),
+  previewEyebrow: $('#preview-eyebrow'),
   previewTitle: $('#preview-title'),
   previewDesc: $('#preview-desc'),
   previewSize: $('#preview-size'),
   previewMeta: $('#preview-meta'),
+
+  templates: $('#templates'),
 
   bgGroup: $('#bg-type-group'),
   panelGradient: $('#panel-gradient'),
@@ -136,6 +243,13 @@ const els = {
   lineHeight: $('#line-height'),
   lineHeightVal: $('#line-height-val'),
   textShadow: $('#text-shadow'),
+  letterSpacing: $('#letter-spacing'),
+  letterSpacingVal: $('#letter-spacing-val'),
+  transformGroup: $('#transform-group'),
+  textItalic: $('#text-italic'),
+  strokeWidth: $('#stroke-width'),
+  strokeWidthVal: $('#stroke-width-val'),
+  strokeColor: $('#stroke-color'),
 
   descSize: $('#desc-size'),
   descSizeVal: $('#desc-size-val'),
@@ -144,6 +258,9 @@ const els = {
   descOpacityVal: $('#desc-opacity-val'),
   descGap: $('#desc-gap'),
   descGapVal: $('#desc-gap-val'),
+  descLetterSpacing: $('#desc-letter-spacing'),
+  descLetterSpacingVal: $('#desc-letter-spacing-val'),
+  descItalic: $('#desc-italic'),
 
   aspectGroup: $('#aspect-group'),
   sizeGroup: $('#size-group'),
@@ -171,6 +288,50 @@ function setSegActive(group, value, attr) {
   });
 }
 
+function setBgImage(src) {
+  const img = els.previewBgImg;
+  if (img.dataset.currentSrc === src) return;
+  img.dataset.currentSrc = src;
+  img.onerror = function () {
+    // CORS-restricted external URL: drop crossorigin so it at least displays
+    if (img.crossOrigin) {
+      img.onerror = null;
+      img.removeAttribute('crossorigin');
+      img.src = src;
+    }
+  };
+  if (src.startsWith('data:')) {
+    img.removeAttribute('crossorigin');
+  } else {
+    img.setAttribute('crossorigin', 'anonymous');
+  }
+  img.src = src;
+}
+
+// Google Fonts stylesheets are cross-origin: JS can't read their CSSOM rules,
+// which breaks html-to-image's auto font embedding. Fetch the CSS ourselves
+// (CORS is allowed for fetch) and pass it as fontEmbedCSS.
+let cachedFontCSS = null;
+async function getFontCSS() {
+  if (cachedFontCSS !== null) return cachedFontCSS;
+  try {
+    const links = Array.from(
+      document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]')
+    );
+    const texts = await Promise.all(
+      links.map((l) =>
+        fetch(l.href, { mode: 'cors' })
+          .then((r) => (r.ok ? r.text() : ''))
+          .catch(() => '')
+      )
+    );
+    cachedFontCSS = texts.join('\n');
+  } catch {
+    cachedFontCSS = '';
+  }
+  return cachedFontCSS;
+}
+
 const loadedFonts = new Set();
 function loadFont(family) {
   if (loadedFonts.has(family)) return;
@@ -186,32 +347,59 @@ function loadFont(family) {
 // ---------- Render ----------
 
 function render() {
-  // text
+  // text content
+  els.previewEyebrow.textContent = state.eyebrow || '';
+  els.previewEyebrow.style.display = state.eyebrow ? 'block' : 'none';
   els.previewTitle.textContent = state.text || ' ';
   els.previewDesc.textContent = state.description || '';
   els.previewDesc.style.display = state.description ? 'block' : 'none';
 
-  // font (shared by title and description; description inherits)
+  // shared font block (color, alignment, shadow inherited)
   els.previewText.style.fontFamily = `'${state.font.family}', system-ui, sans-serif`;
-  els.previewText.style.fontWeight = state.font.weight;
   els.previewText.style.color = state.font.color;
   els.previewText.style.textAlign = state.font.align;
-  els.previewText.style.lineHeight = state.font.lineHeight;
   els.previewText.style.textShadow = state.font.shadow
     ? '0 2px 12px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.6)'
     : 'none';
 
-  // text size — % of preview's smaller side, computed from actual rect
+  // size baseline — % of preview's smaller side
   const rect = els.preview.getBoundingClientRect();
   const minDim = Math.min(rect.width, rect.height);
   const titlePx = (state.font.size * minDim) / 100;
+
+  // title
   els.previewTitle.style.fontSize = `${titlePx}px`;
-  // description: relative size, custom weight/opacity/gap
+  els.previewTitle.style.fontWeight = state.font.weight;
+  els.previewTitle.style.fontStyle = state.font.italic ? 'italic' : 'normal';
+  els.previewTitle.style.lineHeight = state.font.lineHeight;
+  els.previewTitle.style.letterSpacing = `${state.font.letterSpacing}em`;
+  els.previewTitle.style.textTransform = state.font.transform;
+  if (state.font.strokeWidth > 0) {
+    const sw = (state.font.strokeWidth * titlePx) / 100;
+    els.previewTitle.style.webkitTextStroke = `${sw}px ${state.font.strokeColor}`;
+    els.previewTitle.style.paintOrder = 'stroke fill';
+  } else {
+    els.previewTitle.style.webkitTextStroke = '';
+    els.previewTitle.style.paintOrder = '';
+  }
+
+  // description
   els.previewDesc.style.fontSize = `${(titlePx * state.descFont.size) / 100}px`;
   els.previewDesc.style.fontWeight = state.descFont.weight;
+  els.previewDesc.style.fontStyle = state.descFont.italic ? 'italic' : 'normal';
   els.previewDesc.style.opacity = state.descFont.opacity / 100;
   els.previewDesc.style.marginTop = `${state.descFont.gap}em`;
   els.previewDesc.style.lineHeight = '1.35';
+  els.previewDesc.style.letterSpacing = `${state.descFont.letterSpacing}em`;
+
+  // eyebrow (auto-styled small uppercase kicker)
+  els.previewEyebrow.style.fontSize = `${(titlePx * state.eyebrowFont.size) / 100}px`;
+  els.previewEyebrow.style.opacity = state.eyebrowFont.opacity / 100;
+  els.previewEyebrow.style.letterSpacing = `${state.eyebrowFont.letterSpacing}em`;
+  els.previewEyebrow.style.textTransform = 'uppercase';
+  els.previewEyebrow.style.fontWeight = '700';
+  els.previewEyebrow.style.marginBottom = '0.8em';
+  els.previewEyebrow.style.lineHeight = '1.2';
 
   // background
   els.previewBg.style.backgroundImage = '';
@@ -219,6 +407,10 @@ function render() {
   els.previewBg.style.background = '';
   els.previewBg.style.filter = '';
   els.previewBg.style.inset = '0';
+  // hide img by default; only show in image mode with a src
+  els.previewBgImg.style.display = 'none';
+  els.previewBgImg.style.filter = '';
+  els.previewBgImg.style.inset = '0';
 
   if (state.bgType === 'gradient') {
     const colors = [state.gradient.c1, state.gradient.c2];
@@ -229,13 +421,11 @@ function render() {
   } else if (state.bgType === 'solid') {
     els.previewBg.style.background = state.solid;
   } else if (state.bgType === 'image' && state.image.src) {
-    els.previewBg.style.backgroundImage = `url("${state.image.src}")`;
+    setBgImage(state.image.src);
+    els.previewBgImg.style.display = 'block';
     if (state.image.blur > 0) {
-      els.previewBg.style.filter = `blur(${state.image.blur}px)`;
-      // overscale to hide blur edges
-      els.previewBg.style.inset = `-${state.image.blur * 2}px`;
-    } else {
-      els.previewBg.style.inset = '0';
+      els.previewBgImg.style.filter = `blur(${state.image.blur}px)`;
+      els.previewBgImg.style.inset = `-${state.image.blur * 2}px`;
     }
   } else if (state.bgType === 'image') {
     // placeholder pattern when no image yet
@@ -250,19 +440,17 @@ function render() {
     els.previewOverlay.style.background = 'transparent';
   }
 
-  // position
-  els.previewContent.style.alignItems =
+  // vertical position (justify-content on a column flex container)
+  els.previewContent.style.alignItems = '';
+  els.previewContent.style.justifyContent =
     state.position === 'top'
       ? 'flex-start'
       : state.position === 'bottom'
       ? 'flex-end'
       : 'center';
 
-  // aspect
+  // size meta — width/height set by fitPreview()
   const [w, h] = ASPECT_RATIOS[state.aspect];
-  els.preview.style.aspectRatio = `${w} / ${h}`;
-
-  // size meta
   const outW = Math.round(state.outputSize * (w >= h ? 1 : w / h));
   const outH = Math.round(state.outputSize * (w >= h ? h / w : 1));
   els.previewSize.textContent = `${outW} × ${outH}`;
@@ -277,6 +465,31 @@ function scheduleRender() {
     renderRaf = null;
     render();
   });
+}
+
+// Compute preview width/height in pixels so the aspect ratio is always honored,
+// even when the preview's natural height would exceed the mobile/desktop cap.
+function fitPreview() {
+  const wrapper = els.preview.parentElement;
+  if (!wrapper) return;
+  const cs = getComputedStyle(wrapper);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const innerW = Math.max(0, wrapper.clientWidth - padX);
+  const vh = window.innerHeight / 100;
+  const maxHvh = window.innerWidth < 1024 ? 42 : 70;
+  const maxH = maxHvh * vh;
+
+  const [aspW, aspH] = ASPECT_RATIOS[state.aspect];
+  const ratio = aspW / aspH;
+
+  let w = innerW;
+  let h = w / ratio;
+  if (h > maxH) {
+    h = maxH;
+    w = h * ratio;
+  }
+  els.preview.style.width = `${Math.floor(w)}px`;
+  els.preview.style.height = `${Math.floor(h)}px`;
 }
 
 // ---------- Init: populate UI ----------
@@ -331,6 +544,94 @@ function initSolidPresets() {
   });
 }
 
+function initTemplates() {
+  TEMPLATES.forEach((tpl) => {
+    const btn = document.createElement('button');
+    btn.className = 'template-card';
+    btn.setAttribute('style', tpl.swatch);
+    btn.textContent = tpl.label;
+    btn.title = tpl.name;
+    btn.addEventListener('click', () => applyTemplate(tpl));
+    els.templates.appendChild(btn);
+  });
+}
+
+function applyTemplate(tpl) {
+  // deep-merge patch onto state
+  Object.keys(tpl.patch).forEach((k) => {
+    const v = tpl.patch[k];
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      state[k] = Object.assign({}, state[k] || {}, v);
+    } else {
+      state[k] = v;
+    }
+  });
+  loadFont(state.font.family);
+  syncUI();
+  fitPreview();
+  render();
+}
+
+// Push the current state to every input, slider, and seg-btn so a template
+// click (or anything else that mutates state directly) is reflected in the UI.
+function syncUI() {
+  // bg type segment + panels
+  setSegActive(els.bgGroup, state.bgType, 'bg');
+  els.panelGradient.classList.toggle('hidden', state.bgType !== 'gradient');
+  els.panelSolid.classList.toggle('hidden', state.bgType !== 'solid');
+  els.panelImage.classList.toggle('hidden', state.bgType !== 'image');
+
+  // gradient
+  els.gradC1.value = state.gradient.c1;
+  els.gradC2.value = state.gradient.c2;
+  els.gradC3Enabled.checked = !!state.gradient.c3;
+  els.gradC3.disabled = !state.gradient.c3;
+  els.gradC3.style.opacity = state.gradient.c3 ? '1' : '0.4';
+  if (state.gradient.c3) els.gradC3.value = state.gradient.c3;
+  els.gradAngle.value = state.gradient.angle;
+  els.gradAngleVal.textContent = `${state.gradient.angle}°`;
+
+  // solid
+  els.solidColor.value = state.solid;
+  els.solidColorText.value = state.solid.toUpperCase();
+
+  // font
+  els.fontFamily.value = state.font.family;
+  els.fontSize.value = state.font.size;
+  els.fontSizeVal.textContent = state.font.size.toFixed(1);
+  setSegActive(els.fontWeightGroup, state.font.weight, 'weight');
+  els.fontColor.value = state.font.color;
+  els.fontColorText.value = state.font.color.toUpperCase();
+  setSegActive(els.fontAlignGroup, state.font.align, 'align');
+  setSegActive(els.fontPosGroup, state.position, 'pos');
+  els.lineHeight.value = state.font.lineHeight;
+  els.lineHeightVal.textContent = state.font.lineHeight.toFixed(2);
+  els.textShadow.checked = state.font.shadow;
+  els.letterSpacing.value = state.font.letterSpacing;
+  els.letterSpacingVal.textContent = state.font.letterSpacing.toFixed(3);
+  setSegActive(els.transformGroup, state.font.transform, 'transform');
+  els.textItalic.checked = state.font.italic;
+  els.strokeWidth.value = state.font.strokeWidth;
+  els.strokeWidthVal.textContent = state.font.strokeWidth.toFixed(2);
+  els.strokeColor.value = state.font.strokeColor;
+
+  // description
+  els.descSize.value = state.descFont.size;
+  els.descSizeVal.textContent = `${state.descFont.size}%`;
+  setSegActive(els.descWeightGroup, state.descFont.weight, 'descWeight');
+  els.descOpacity.value = state.descFont.opacity;
+  els.descOpacityVal.textContent = `${state.descFont.opacity}%`;
+  els.descGap.value = state.descFont.gap;
+  els.descGapVal.textContent = state.descFont.gap.toFixed(2);
+  els.descLetterSpacing.value = state.descFont.letterSpacing;
+  els.descLetterSpacingVal.textContent = state.descFont.letterSpacing.toFixed(3);
+  els.descItalic.checked = state.descFont.italic;
+
+  // format
+  setSegActive(els.aspectGroup, state.aspect, 'aspect');
+  setSegActive(els.sizeGroup, state.outputSize, 'size');
+}
+
 // ---------- Listeners ----------
 
 function bindAll() {
@@ -339,6 +640,13 @@ function bindAll() {
   state.text = els.textInput.value;
   els.textInput.addEventListener('input', () => {
     state.text = els.textInput.value;
+    render();
+  });
+
+  // eyebrow
+  state.eyebrow = els.eyebrowInput.value;
+  els.eyebrowInput.addEventListener('input', () => {
+    state.eyebrow = els.eyebrowInput.value;
     render();
   });
 
@@ -561,6 +869,39 @@ function bindAll() {
     render();
   });
 
+  // letter-spacing (title)
+  els.letterSpacing.addEventListener('input', () => {
+    state.font.letterSpacing = +els.letterSpacing.value;
+    els.letterSpacingVal.textContent = state.font.letterSpacing.toFixed(3);
+    render();
+  });
+
+  // text transform
+  els.transformGroup.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-transform]');
+    if (!btn) return;
+    state.font.transform = btn.dataset.transform;
+    setSegActive(els.transformGroup, state.font.transform, 'transform');
+    render();
+  });
+
+  // italic
+  els.textItalic.addEventListener('change', () => {
+    state.font.italic = els.textItalic.checked;
+    render();
+  });
+
+  // stroke
+  els.strokeWidth.addEventListener('input', () => {
+    state.font.strokeWidth = +els.strokeWidth.value;
+    els.strokeWidthVal.textContent = state.font.strokeWidth.toFixed(2);
+    render();
+  });
+  els.strokeColor.addEventListener('input', () => {
+    state.font.strokeColor = els.strokeColor.value;
+    render();
+  });
+
   // description: size
   els.descSize.addEventListener('input', () => {
     state.descFont.size = +els.descSize.value;
@@ -587,6 +928,17 @@ function bindAll() {
     els.descGapVal.textContent = state.descFont.gap.toFixed(2);
     render();
   });
+  // description: letter-spacing
+  els.descLetterSpacing.addEventListener('input', () => {
+    state.descFont.letterSpacing = +els.descLetterSpacing.value;
+    els.descLetterSpacingVal.textContent = state.descFont.letterSpacing.toFixed(3);
+    render();
+  });
+  // description: italic
+  els.descItalic.addEventListener('change', () => {
+    state.descFont.italic = els.descItalic.checked;
+    render();
+  });
 
   // aspect
   els.aspectGroup.addEventListener('click', (e) => {
@@ -594,6 +946,7 @@ function bindAll() {
     if (!btn) return;
     state.aspect = btn.dataset.aspect;
     setSegActive(els.aspectGroup, state.aspect, 'aspect');
+    fitPreview();
     render();
   });
 
@@ -706,6 +1059,10 @@ async function selectUnsplash(photo) {
 // ---------- Download ----------
 
 async function download(format) {
+  if (typeof htmlToImage === 'undefined') {
+    els.downloadStatus.textContent = 'Библиотека снапшота не загрузилась — перезагрузите страницу.';
+    return;
+  }
   els.downloadStatus.textContent = 'Готовлю изображение…';
   els.downloadPng.disabled = true;
   els.downloadJpg.disabled = true;
@@ -721,10 +1078,11 @@ async function download(format) {
     const targetH = w >= h ? Math.round((state.outputSize * h) / w) : state.outputSize;
     const pixelRatio = targetW / rect.width;
 
+    const fontEmbedCSS = await getFontCSS();
     const canvas = await htmlToImage.toCanvas(els.preview, {
       pixelRatio,
       backgroundColor: format === 'jpg' ? '#ffffff' : undefined,
-      cacheBust: true,
+      fontEmbedCSS,
     });
 
     const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
@@ -768,12 +1126,20 @@ function init() {
   initFonts();
   initGradientPresets();
   initSolidPresets();
+  initTemplates();
   bindAll();
 
   // observe preview size to recompute font-size
   const ro = new ResizeObserver(scheduleRender);
   ro.observe(els.preview);
 
+  // viewport changes (orientation, browser chrome) → re-fit preview
+  window.addEventListener('resize', () => {
+    fitPreview();
+    scheduleRender();
+  });
+
+  fitPreview();
   render();
 }
 
