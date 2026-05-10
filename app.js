@@ -81,6 +81,7 @@ const els = {
   descInput: $('#desc-input'),
   preview: $('#preview'),
   previewBg: $('#preview-bg'),
+  previewBgImg: $('#preview-bg-img'),
   previewOverlay: $('#preview-overlay'),
   previewContent: $('#preview-content'),
   previewText: $('#preview-text'),
@@ -171,6 +172,50 @@ function setSegActive(group, value, attr) {
   });
 }
 
+function setBgImage(src) {
+  const img = els.previewBgImg;
+  if (img.dataset.currentSrc === src) return;
+  img.dataset.currentSrc = src;
+  img.onerror = function () {
+    // CORS-restricted external URL: drop crossorigin so it at least displays
+    if (img.crossOrigin) {
+      img.onerror = null;
+      img.removeAttribute('crossorigin');
+      img.src = src;
+    }
+  };
+  if (src.startsWith('data:')) {
+    img.removeAttribute('crossorigin');
+  } else {
+    img.setAttribute('crossorigin', 'anonymous');
+  }
+  img.src = src;
+}
+
+// Google Fonts stylesheets are cross-origin: JS can't read their CSSOM rules,
+// which breaks html-to-image's auto font embedding. Fetch the CSS ourselves
+// (CORS is allowed for fetch) and pass it as fontEmbedCSS.
+let cachedFontCSS = null;
+async function getFontCSS() {
+  if (cachedFontCSS !== null) return cachedFontCSS;
+  try {
+    const links = Array.from(
+      document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]')
+    );
+    const texts = await Promise.all(
+      links.map((l) =>
+        fetch(l.href, { mode: 'cors' })
+          .then((r) => (r.ok ? r.text() : ''))
+          .catch(() => '')
+      )
+    );
+    cachedFontCSS = texts.join('\n');
+  } catch {
+    cachedFontCSS = '';
+  }
+  return cachedFontCSS;
+}
+
 const loadedFonts = new Set();
 function loadFont(family) {
   if (loadedFonts.has(family)) return;
@@ -219,6 +264,10 @@ function render() {
   els.previewBg.style.background = '';
   els.previewBg.style.filter = '';
   els.previewBg.style.inset = '0';
+  // hide img by default; only show in image mode with a src
+  els.previewBgImg.style.display = 'none';
+  els.previewBgImg.style.filter = '';
+  els.previewBgImg.style.inset = '0';
 
   if (state.bgType === 'gradient') {
     const colors = [state.gradient.c1, state.gradient.c2];
@@ -229,13 +278,11 @@ function render() {
   } else if (state.bgType === 'solid') {
     els.previewBg.style.background = state.solid;
   } else if (state.bgType === 'image' && state.image.src) {
-    els.previewBg.style.backgroundImage = `url("${state.image.src}")`;
+    setBgImage(state.image.src);
+    els.previewBgImg.style.display = 'block';
     if (state.image.blur > 0) {
-      els.previewBg.style.filter = `blur(${state.image.blur}px)`;
-      // overscale to hide blur edges
-      els.previewBg.style.inset = `-${state.image.blur * 2}px`;
-    } else {
-      els.previewBg.style.inset = '0';
+      els.previewBgImg.style.filter = `blur(${state.image.blur}px)`;
+      els.previewBgImg.style.inset = `-${state.image.blur * 2}px`;
     }
   } else if (state.bgType === 'image') {
     // placeholder pattern when no image yet
@@ -749,10 +796,11 @@ async function download(format) {
     const targetH = w >= h ? Math.round((state.outputSize * h) / w) : state.outputSize;
     const pixelRatio = targetW / rect.width;
 
+    const fontEmbedCSS = await getFontCSS();
     const canvas = await htmlToImage.toCanvas(els.preview, {
       pixelRatio,
       backgroundColor: format === 'jpg' ? '#ffffff' : undefined,
-      cacheBust: true,
+      fontEmbedCSS,
     });
 
     const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
