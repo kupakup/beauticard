@@ -51,6 +51,7 @@ const ASPECT_RATIOS = {
 
 const state = {
   text: '',
+  description: '',
   bgType: 'gradient',
   gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
   solid: '#6366f1',
@@ -76,11 +77,14 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const els = {
   textInput: $('#text-input'),
+  descInput: $('#desc-input'),
   preview: $('#preview'),
   previewBg: $('#preview-bg'),
   previewOverlay: $('#preview-overlay'),
   previewContent: $('#preview-content'),
   previewText: $('#preview-text'),
+  previewTitle: $('#preview-title'),
+  previewDesc: $('#preview-desc'),
   previewSize: $('#preview-size'),
   previewMeta: $('#preview-meta'),
 
@@ -174,9 +178,11 @@ function loadFont(family) {
 
 function render() {
   // text
-  els.previewText.textContent = state.text || ' ';
+  els.previewTitle.textContent = state.text || ' ';
+  els.previewDesc.textContent = state.description || '';
+  els.previewDesc.style.display = state.description ? 'block' : 'none';
 
-  // font
+  // font (shared by title and description; description inherits)
   els.previewText.style.fontFamily = `'${state.font.family}', system-ui, sans-serif`;
   els.previewText.style.fontWeight = state.font.weight;
   els.previewText.style.color = state.font.color;
@@ -189,7 +195,11 @@ function render() {
   // text size — % of preview's smaller side, computed from actual rect
   const rect = els.preview.getBoundingClientRect();
   const minDim = Math.min(rect.width, rect.height);
-  els.previewText.style.fontSize = `${(state.font.size * minDim) / 100}px`;
+  const titlePx = (state.font.size * minDim) / 100;
+  els.previewTitle.style.fontSize = `${titlePx}px`;
+  // description is auto-sized at ~45% of title, slightly tighter line-height
+  els.previewDesc.style.fontSize = `${titlePx * 0.45}px`;
+  els.previewDesc.style.lineHeight = '1.35';
 
   // background
   els.previewBg.style.backgroundImage = '';
@@ -317,6 +327,13 @@ function bindAll() {
   state.text = els.textInput.value;
   els.textInput.addEventListener('input', () => {
     state.text = els.textInput.value;
+    render();
+  });
+
+  // description
+  state.description = els.descInput.value;
+  els.descInput.addEventListener('input', () => {
+    state.description = els.descInput.value;
     render();
   });
 
@@ -617,13 +634,34 @@ async function searchUnsplash() {
   }
 }
 
-function selectUnsplash(photo) {
-  state.image.src = photo.urls.regular;
+async function selectUnsplash(photo) {
   const utm = '?utm_source=beauticard&utm_medium=referral';
   const author = `<a href="${photo.user.links.html}${utm}" target="_blank" rel="noopener" class="hover:text-slate-700 underline">${photo.user.name}</a>`;
   const home = `<a href="https://unsplash.com/${utm}" target="_blank" rel="noopener" class="hover:text-slate-700 underline">Unsplash</a>`;
   state.image.attribution = `Photo by ${author} on ${home}`;
+
+  // Show photo immediately, then swap to data-URL once fetched so html2canvas can capture it.
+  state.image.src = photo.urls.regular;
   render();
+  els.unsplashStatus.textContent = 'Загружаю фото…';
+
+  try {
+    const res = await fetch(photo.urls.regular, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+    state.image.src = dataUrl;
+    render();
+    els.unsplashStatus.textContent = 'Фото загружено — можно скачивать.';
+  } catch (err) {
+    console.error(err);
+    els.unsplashStatus.textContent = 'Картинка отображается, но скачивание может не сработать из-за CORS.';
+  }
 }
 
 // ---------- Download ----------
