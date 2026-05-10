@@ -115,9 +115,6 @@
     .photo-thumb:hover { opacity: 0.82; }
     .photo-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
     .preview-card .text .description {
-      margin-top: 0.6em;
-      opacity: 0.85;
-      font-weight: 400 !important;
       letter-spacing: 0;
     }
     /* hide native file input */
@@ -397,6 +394,38 @@
               <input type="checkbox" id="text-shadow" class="rounded" />
               Тень текста
             </label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Настройки описания</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Размер от заголовка</span><span id="desc-size-val">45%</span>
+              </div>
+              <input type="range" id="desc-size" min="25" max="80" step="1" value="45" />
+            </div>
+            <div>
+              <div class="text-xs text-slate-500 mb-1">Толщина</div>
+              <div class="grid grid-cols-3 gap-2" id="desc-weight-group">
+                <button class="seg-btn active" data-desc-weight="400">Regular</button>
+                <button class="seg-btn" data-desc-weight="600">Medium</button>
+                <button class="seg-btn" data-desc-weight="700">Bold</button>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Прозрачность</span><span id="desc-opacity-val">85%</span>
+              </div>
+              <input type="range" id="desc-opacity" min="30" max="100" step="1" value="85" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Отступ от заголовка</span><span id="desc-gap-val">0.60</span>
+              </div>
+              <input type="range" id="desc-gap" min="0" max="2.5" step="0.05" value="0.6" />
+            </div>
           </div>
         </div>
 

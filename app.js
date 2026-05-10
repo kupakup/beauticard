@@ -52,6 +52,7 @@ const ASPECT_RATIOS = {
 const state = {
   text: '',
   description: '',
+  descFont: { size: 45, weight: 400, opacity: 85, gap: 0.6 },
   bgType: 'gradient',
   gradient: { c1: '#6366f1', c2: '#ec4899', c3: null, angle: 135 },
   solid: '#6366f1',
@@ -136,6 +137,14 @@ const els = {
   lineHeightVal: $('#line-height-val'),
   textShadow: $('#text-shadow'),
 
+  descSize: $('#desc-size'),
+  descSizeVal: $('#desc-size-val'),
+  descWeightGroup: $('#desc-weight-group'),
+  descOpacity: $('#desc-opacity'),
+  descOpacityVal: $('#desc-opacity-val'),
+  descGap: $('#desc-gap'),
+  descGapVal: $('#desc-gap-val'),
+
   aspectGroup: $('#aspect-group'),
   sizeGroup: $('#size-group'),
   downloadPng: $('#download-png'),
@@ -197,8 +206,11 @@ function render() {
   const minDim = Math.min(rect.width, rect.height);
   const titlePx = (state.font.size * minDim) / 100;
   els.previewTitle.style.fontSize = `${titlePx}px`;
-  // description is auto-sized at ~45% of title, slightly tighter line-height
-  els.previewDesc.style.fontSize = `${titlePx * 0.45}px`;
+  // description: relative size, custom weight/opacity/gap
+  els.previewDesc.style.fontSize = `${(titlePx * state.descFont.size) / 100}px`;
+  els.previewDesc.style.fontWeight = state.descFont.weight;
+  els.previewDesc.style.opacity = state.descFont.opacity / 100;
+  els.previewDesc.style.marginTop = `${state.descFont.gap}em`;
   els.previewDesc.style.lineHeight = '1.35';
 
   // background
@@ -546,6 +558,33 @@ function bindAll() {
   // shadow
   els.textShadow.addEventListener('change', () => {
     state.font.shadow = els.textShadow.checked;
+    render();
+  });
+
+  // description: size
+  els.descSize.addEventListener('input', () => {
+    state.descFont.size = +els.descSize.value;
+    els.descSizeVal.textContent = `${state.descFont.size}%`;
+    render();
+  });
+  // description: weight
+  els.descWeightGroup.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-desc-weight]');
+    if (!btn) return;
+    state.descFont.weight = +btn.dataset.descWeight;
+    setSegActive(els.descWeightGroup, state.descFont.weight, 'descWeight');
+    render();
+  });
+  // description: opacity
+  els.descOpacity.addEventListener('input', () => {
+    state.descFont.opacity = +els.descOpacity.value;
+    els.descOpacityVal.textContent = `${state.descFont.opacity}%`;
+    render();
+  });
+  // description: gap
+  els.descGap.addEventListener('input', () => {
+    state.descFont.gap = +els.descGap.value;
+    els.descGapVal.textContent = state.descFont.gap.toFixed(2);
     render();
   });
 
