@@ -730,6 +730,10 @@ async function selectUnsplash(photo) {
 // ---------- Download ----------
 
 async function download(format) {
+  if (typeof htmlToImage === 'undefined') {
+    els.downloadStatus.textContent = 'Библиотека снапшота не загрузилась — перезагрузите страницу.';
+    return;
+  }
   els.downloadStatus.textContent = 'Готовлю изображение…';
   els.downloadPng.disabled = true;
   els.downloadJpg.disabled = true;
