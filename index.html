@@ -132,6 +132,29 @@
     .preview-card .text .description {
       letter-spacing: 0;
     }
+    .preview-card .text .eyebrow {
+      display: none;
+    }
+    .template-card {
+      cursor: pointer;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      aspect-ratio: 1.91 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6%;
+      text-align: center;
+      font-weight: 700;
+      font-size: 11px;
+      line-height: 1.2;
+      transition: transform 0.1s, box-shadow 0.1s;
+      border: 1px solid transparent;
+    }
+    .template-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
     /* hide native file input */
     .file-hidden { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
     /* loader */
@@ -164,7 +187,14 @@
       <!-- Left: text + preview -->
       <section class="contents lg:flex lg:flex-col lg:gap-4 lg:min-w-0">
         <div class="panel">
-          <label class="panel-title" for="text-input">Заголовок</label>
+          <label class="panel-title" for="eyebrow-input">Надпись над заголовком</label>
+          <input
+            id="eyebrow-input"
+            type="text"
+            class="w-full p-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-sm"
+            placeholder="необязательно, например: ИСТОРИЯ"
+          />
+          <label class="panel-title mt-4" for="text-input">Заголовок</label>
           <textarea
             id="text-input"
             rows="2"
@@ -196,6 +226,7 @@
               <div id="preview-overlay" class="layer-overlay"></div>
               <div id="preview-content" class="layer-content">
                 <div id="preview-text" class="text">
+                  <div id="preview-eyebrow" class="eyebrow"></div>
                   <div id="preview-title"></div>
                   <div id="preview-desc" class="description"></div>
                 </div>
@@ -208,6 +239,12 @@
 
       <!-- Right: settings -->
       <aside class="contents lg:flex lg:flex-col lg:gap-4">
+        <div class="panel">
+          <h3 class="panel-title">Шаблоны оформления</h3>
+          <div class="grid grid-cols-3 gap-2" id="templates"></div>
+          <p class="text-xs text-slate-400 mt-2">Клик заменяет фон, шрифт и оформление текста сразу.</p>
+        </div>
+
         <!-- Background type -->
         <div class="panel">
           <h3 class="panel-title">Фон</h3>
@@ -405,10 +442,41 @@
               </div>
               <input type="range" id="line-height" min="0.9" max="2" step="0.05" value="1.2" />
             </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Трекинг (межбуквенный)</span><span id="letter-spacing-val">-0.01</span>
+              </div>
+              <input type="range" id="letter-spacing" min="-0.05" max="0.4" step="0.005" value="-0.01" />
+            </div>
+            <div>
+              <div class="text-xs text-slate-500 mb-1">Регистр</div>
+              <div class="grid grid-cols-3 gap-2" id="transform-group">
+                <button class="seg-btn active" data-transform="none">Aa</button>
+                <button class="seg-btn" data-transform="uppercase">AA</button>
+                <button class="seg-btn" data-transform="lowercase">aa</button>
+              </div>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+              <input type="checkbox" id="text-italic" class="rounded" />
+              Курсив
+            </label>
             <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
               <input type="checkbox" id="text-shadow" class="rounded" />
               Тень текста
             </label>
+            <div class="border-t border-slate-100 pt-3 space-y-3">
+              <div class="text-xs text-slate-500">Обводка букв</div>
+              <div>
+                <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                  <span>Толщина (% от размера)</span><span id="stroke-width-val">0</span>
+                </div>
+                <input type="range" id="stroke-width" min="0" max="8" step="0.25" value="0" />
+              </div>
+              <div class="flex items-center gap-3">
+                <input type="color" id="stroke-color" value="#000000" class="input-color" />
+                <span class="text-xs text-slate-500">Цвет обводки</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -441,6 +509,16 @@
               </div>
               <input type="range" id="desc-gap" min="-1" max="2.5" step="0.05" value="0.6" />
             </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Трекинг</span><span id="desc-letter-spacing-val">0.00</span>
+              </div>
+              <input type="range" id="desc-letter-spacing" min="-0.05" max="0.4" step="0.005" value="0" />
+            </div>
+            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+              <input type="checkbox" id="desc-italic" class="rounded" />
+              Курсив
+            </label>
           </div>
         </div>
 
