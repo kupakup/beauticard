@@ -389,6 +389,37 @@
           </div>
         </div>
 
+        <!-- Eyebrow settings -->
+        <div class="panel">
+          <h3 class="panel-title">Настройки надписи над заголовком</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Отступ до заголовка</span><span id="eyebrow-gap-val">0.80</span>
+              </div>
+              <input type="range" id="eyebrow-gap" min="-0.5" max="3" step="0.05" value="0.8" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Размер от заголовка</span><span id="eyebrow-size-val">32%</span>
+              </div>
+              <input type="range" id="eyebrow-size" min="15" max="60" step="1" value="32" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Прозрачность</span><span id="eyebrow-opacity-val">80%</span>
+              </div>
+              <input type="range" id="eyebrow-opacity" min="30" max="100" step="1" value="80" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>Трекинг</span><span id="eyebrow-letter-spacing-val">0.150</span>
+              </div>
+              <input type="range" id="eyebrow-letter-spacing" min="0" max="0.5" step="0.005" value="0.15" />
+            </div>
+          </div>
+        </div>
+
         <!-- Text settings -->
         <div class="panel">
           <h3 class="panel-title">Настройки текста и шрифта</h3>
