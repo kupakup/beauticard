@@ -194,21 +194,29 @@ function BackgroundLayer({ bg, presetDeco }) {
    Decorations per preset
    ============================================================ */
 
-function Decoration({ presetId, dark, mute }) {
+function Decoration({ presetId, deco = {}, mute }) {
   if (mute) return null;
+  const d = {
+    brand: deco.brand ?? 'BEAUTICARD',
+    issue: deco.issue ?? '№ 24',
+    date: deco.date ?? 'МАЙ · 2026',
+    badge: deco.badge ?? 'НОВОЕ',
+    tagline: deco.tagline ?? 'ДИЗАЙН · КУЛЬТУРА · ТЕХНО',
+    readTime: deco.readTime ?? 'ЧТЕНИЕ · 8 МИН',
+  };
   if (presetId === 'magazine') {
     return (
       <>
         <div style={{position:'absolute', top:'5cqi', left:'5cqi', display:'flex', gap:'1.5cqi',
           fontFamily: FONTS.mono, fontSize:'1.8cqi', color:'#161616', letterSpacing:'.05em'}}>
-          <span style={{padding:'.6cqi 1.4cqi', background:'#161616', color:'#F2EBDC', fontWeight:600, borderRadius:'2px'}}>№ 24</span>
-          <span style={{padding:'.6cqi 0', fontWeight:500}}>MAY · 2026</span>
+          {d.issue && <span style={{padding:'.6cqi 1.4cqi', background:'#161616', color:'#F2EBDC', fontWeight:600, borderRadius:'2px'}}>{d.issue}</span>}
+          {d.date && <span style={{padding:'.6cqi 0', fontWeight:500}}>{d.date}</span>}
         </div>
-        <div style={{position:'absolute', right:'5cqi', top:'5cqi',
+        {d.tagline && <div style={{position:'absolute', right:'5cqi', top:'5cqi',
           fontFamily: FONTS.mono, fontSize:'1.6cqi', color:'#161616', writingMode:'vertical-rl',
           letterSpacing:'.18em', fontWeight:500}}>
-          DESIGN — CULTURE — TECH
-        </div>
+          {d.tagline}
+        </div>}
         <div style={{position:'absolute', left:'5cqi', right:'5cqi', bottom:'4.5cqi', height:'1px', background:'#161616', opacity:.2}} />
       </>
     );
@@ -221,10 +229,10 @@ function Decoration({ presetId, dark, mute }) {
           fontFamily: FONTS.garamond, fontSize:'1.8cqi', color:'#C9B66E', letterSpacing:'.5em', fontWeight:500}}>
           ✦   ✦   ✦
         </div>
-        <div style={{position:'absolute', bottom:'5cqi', left:0, right:0, textAlign:'center',
+        {d.date && <div style={{position:'absolute', bottom:'5cqi', left:0, right:0, textAlign:'center',
           fontFamily: FONTS.garamond, fontSize:'1.8cqi', color:'#C9B66E', letterSpacing:'.4em', fontWeight:500}}>
-          MMXXVI
-        </div>
+          {d.date}
+        </div>}
       </>
     );
   }
@@ -233,11 +241,11 @@ function Decoration({ presetId, dark, mute }) {
       <>
         <div style={{position:'absolute', top:'5cqi', left:'5cqi', right:'5cqi', display:'flex', justifyContent:'space-between',
           fontFamily: FONTS.manrope, fontSize:'1.8cqi', color:'#8A8780', fontWeight:600, letterSpacing:'.04em'}}>
-          <span>BEAUTICARD</span><span>№ 024</span>
+          <span>{d.brand}</span><span>{d.issue}</span>
         </div>
         <div style={{position:'absolute', bottom:'5cqi', left:'5cqi', right:'5cqi', display:'flex', justifyContent:'space-between',
           fontFamily: FONTS.manrope, fontSize:'1.6cqi', color:'#9C9A93', fontWeight:500}}>
-          <span>—  Vol. 4</span><span>2026</span>
+          <span>{d.tagline}</span><span>{d.date}</span>
         </div>
       </>
     );
@@ -248,29 +256,31 @@ function Decoration({ presetId, dark, mute }) {
         <div style={{position:'absolute', top:0, left:0, right:0, height:'6cqi', background:'#0A0A0A'}} />
         <div style={{position:'absolute', top:'1.4cqi', left:'4cqi', right:'4cqi', display:'flex', justifyContent:'space-between',
           color:'#F2DC1B', fontFamily:FONTS.mono, fontSize:'1.8cqi', fontWeight:600, letterSpacing:'.06em'}}>
-          <span>★ ISSUE 024 ★</span><span>MAY 13 / 2026</span>
+          <span>★ {d.issue} ★</span><span>{d.date}</span>
         </div>
-        <div style={{position:'absolute', right:'4cqi', top:'10cqi', width:'14cqi', height:'14cqi',
-          background:'#E2231A', borderRadius:'50%'}} />
-        <div style={{position:'absolute', right:'5cqi', top:'14cqi', width:'12cqi', textAlign:'center',
-          color:'#F2DC1B', fontFamily:FONTS.archivo, fontSize:'2.4cqi', lineHeight:'1', letterSpacing:'-.02em'}}>
-          NEW<br/>SHIT
-        </div>
+        {d.badge && <>
+          <div style={{position:'absolute', right:'4cqi', top:'10cqi', width:'14cqi', height:'14cqi',
+            background:'#E2231A', borderRadius:'50%'}} />
+          <div style={{position:'absolute', right:'5cqi', top:'14cqi', width:'12cqi', textAlign:'center',
+            color:'#F2DC1B', fontFamily:FONTS.archivo, fontSize:'2.4cqi', lineHeight:'1', letterSpacing:'-.02em'}}>
+            {d.badge}
+          </div>
+        </>}
       </>
     );
   }
   if (presetId === 'editorial') {
     return (
       <>
-        <div style={{position:'absolute', top:'5cqi', left:0, right:0, textAlign:'center',
+        {d.brand && <div style={{position:'absolute', top:'5cqi', left:0, right:0, textAlign:'center',
           fontFamily: FONTS.manrope, fontSize:'1.8cqi', color:'#1A1A1A', letterSpacing:'.4em', fontWeight:600}}>
-          THE BEAUTICARD REVIEW
-        </div>
+          {d.brand}
+        </div>}
         <div style={{position:'absolute', top:'9cqi', left:'30%', right:'30%', height:'1px', background:'#1A1A1A', opacity:.4}} />
-        <div style={{position:'absolute', bottom:'5cqi', left:0, right:0, textAlign:'center',
+        {d.tagline && <div style={{position:'absolute', bottom:'5cqi', left:0, right:0, textAlign:'center',
           fontFamily: FONTS.garamond, fontSize:'1.8cqi', color:'#7A7670', fontStyle:'italic'}}>
-          № 24 — Mayday Issue — 2026
-        </div>
+          {d.tagline}
+        </div>}
       </>
     );
   }
@@ -283,12 +293,12 @@ function Decoration({ presetId, dark, mute }) {
           opacity:.6}} />
         <div style={{position:'absolute', top:'5cqi', left:'5cqi', right:'5cqi', display:'flex', justifyContent:'space-between', alignItems:'center',
           fontFamily: FONTS.mono, fontSize:'1.8cqi', color:'#85858E', fontWeight:500}}>
-          <span style={{color:'#8B89F7'}}>● beauticard.dev</span>
-          <span>v1.4.0 · 2026-05-13</span>
+          <span style={{color:'#8B89F7'}}>● {d.brand}</span>
+          <span>{d.date}</span>
         </div>
         <div style={{position:'absolute', bottom:'5cqi', left:'5cqi', right:'5cqi', display:'flex', justifyContent:'space-between',
           fontFamily: FONTS.mono, fontSize:'1.6cqi', color:'#5A5A63'}}>
-          <span>~/articles/024 →</span><span>READ · 8 min</span>
+          <span>{d.issue} →</span><span>{d.readTime}</span>
         </div>
       </>
     );
@@ -297,7 +307,7 @@ function Decoration({ presetId, dark, mute }) {
     return (
       <div style={{position:'absolute', top:'5cqi', left:'5cqi', right:'5cqi', display:'flex', justifyContent:'space-between',
         fontFamily: FONTS.manrope, fontSize:'1.8cqi', color:'#fff', opacity:.8, fontWeight:600, letterSpacing:'.18em'}}>
-        <span>BEAUTICARD</span><span>№ 024</span>
+        <span>{d.brand}</span><span>{d.issue}</span>
       </div>
     );
   }
@@ -305,7 +315,7 @@ function Decoration({ presetId, dark, mute }) {
     return (
       <div style={{position:'absolute', top:'5cqi', left:0, right:0, textAlign:'center',
         fontFamily: FONTS.manrope, fontSize:'1.8cqi', color:'#fff', opacity:.85, fontWeight:600, letterSpacing:'.3em'}}>
-        ◇   BEAUTICARD   ◇
+        ◇   {d.brand}   ◇
       </div>
     );
   }
@@ -333,7 +343,7 @@ function fieldStyle(field) {
   };
 }
 
-function CoverPreview({ presetId, content, overrides, bgOverride, layoutOverride, hideDeco, aspect }) {
+function CoverPreview({ presetId, content, deco, overrides, bgOverride, layoutOverride, hideDeco, aspect }) {
   const preset = PRESETS[presetId];
   const bg = bgOverride || preset.bg;
   const layout = { ...preset.layout, ...(layoutOverride||{}) };
@@ -363,7 +373,7 @@ function CoverPreview({ presetId, content, overrides, bgOverride, layoutOverride
   return (
     <div className="cover" style={{ aspectRatio: ASPECTS[aspect].w + '/' + ASPECTS[aspect].h, width:'100%', height:'100%' }}>
       <BackgroundLayer bg={bg} presetDeco={!hideDeco && bg.mode === 'photo'} />
-      <Decoration presetId={presetId} mute={hideDeco} />
+      <Decoration presetId={presetId} deco={deco} mute={hideDeco} />
       <div style={{
         position:'absolute', inset:0,
         padding: pad,

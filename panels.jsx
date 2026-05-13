@@ -2,7 +2,7 @@
    Right panel — Style / Text / Typography / Background / Templates
    ============================================================ */
 
-const { useState } = React;
+const { useState, useEffect, useRef } = React;
 
 /* ---------- Icons ---------- */
 const Icon = ({ name, sm, lg }) => {
@@ -128,10 +128,39 @@ function TabStyle({ presetId, setPresetId, content }) {
 }
 
 /* ============================================================
-   Tab: Text — 3 inputs
+   Tab: Text — content + decorations
    ============================================================ */
-function TabText({ content, setContent }) {
+const DECO_USE = {
+  magazine: ['issue', 'date', 'tagline'],
+  book:     ['date'],
+  modern:   ['brand', 'issue', 'tagline', 'date'],
+  brutalist:['issue', 'date', 'badge'],
+  editorial:['brand', 'tagline'],
+  tech:     ['brand', 'date', 'issue', 'readTime'],
+  photo:    ['brand', 'issue'],
+  gradient: ['brand'],
+};
+const DECO_LABELS = {
+  brand:    { label:'Бренд / название',   ph:'BEAUTICARD',           max:32 },
+  issue:    { label:'Номер выпуска',      ph:'№ 24',                 max:24 },
+  date:     { label:'Дата',               ph:'МАЙ · 2026',           max:32 },
+  badge:    { label:'Метка (на печати)',  ph:'НОВОЕ',                max:14 },
+  tagline:  { label:'Слоган / линия',     ph:'ДИЗАЙН · КУЛЬТУРА',    max:64 },
+  readTime: { label:'Метка справа',       ph:'ЧТЕНИЕ · 8 МИН',       max:24 },
+};
+const DECO_DEFAULTS = {
+  brand: 'BEAUTICARD',
+  issue: '№ 24',
+  date: 'МАЙ · 2026',
+  badge: 'НОВОЕ',
+  tagline: 'ДИЗАЙН · КУЛЬТУРА · ТЕХНО',
+  readTime: 'ЧТЕНИЕ · 8 МИН',
+};
+
+function TabText({ content, setContent, deco, setDeco, presetId }) {
   const ch = (k) => (e) => setContent({ ...content, [k]: e.target.value });
+  const chDeco = (k) => (e) => setDeco({ ...deco, [k]: e.target.value });
+  const usedFields = DECO_USE[presetId] || [];
   return (
     <>
       <div className="sec">
@@ -167,13 +196,29 @@ function TabText({ content, setContent }) {
             maxLength={160} rows={2}/>
         </div>
       </div>
+
       <div className="sec">
-        <div className="sec-hd"><h3>AI-подсказка</h3><span className="sec-act">3 ⚡</span></div>
-        <div className="search-box">
-          <Icon name="sparkles"/>
-          <input placeholder="Тема статьи — предложу заголовок"/>
-          <button className="btn ghost" style={{height:22, fontSize:11, padding:'0 8px'}}>Запустить</button>
+        <div className="sec-hd">
+          <h3>Украшения этого стиля</h3>
+          <span className="sec-act" onClick={() => setDeco({...DECO_DEFAULTS})}>По умолчанию</span>
         </div>
+        {usedFields.length === 0 ? (
+          <p style={{fontSize:11.5, color:'var(--text-3)', margin:0}}>
+            В этом стиле украшений нет.
+          </p>
+        ) : usedFields.map(k => {
+          const meta = DECO_LABELS[k];
+          return (
+            <div className="field" key={k}>
+              <div className="field-label">
+                <span>{meta.label}</span>
+                <span className="val">{(deco[k] || '').length}/{meta.max}</span>
+              </div>
+              <input className="input" value={deco[k] || ''} onChange={chDeco(k)}
+                placeholder={meta.ph} maxLength={meta.max}/>
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -407,29 +452,7 @@ function TabBackground({ bg, setBg, presetId }) {
         )}
 
         {mode === 'blocks' && (
-          <>
-            <div className="field">
-              <div className="field-label"><span>Конструктор фигур</span></div>
-              <div className="blocks-mini">
-                {(eff.shapes||[]).map((s, i) => (
-                  <div key={i} className="lay" style={{
-                    left:`${s.x}%`, top:`${s.y}%`, width:`${s.w}%`, height:`${s.h}%`,
-                    background:s.color, borderRadius: s.r === 'circle' ? '50%' : (s.r||0)+'px',
-                    transform: s.rot ? `rotate(${s.rot}deg)` : 'none',
-                  }}/>
-                ))}
-              </div>
-              <div className="blocks-pal">
-                <button><Icon name="plus" sm/> Круг</button>
-                <button><Icon name="plus" sm/> Прямоугольник</button>
-                <button><Icon name="palette" sm/></button>
-              </div>
-            </div>
-            <div className="field">
-              <div className="field-label"><span>Цвет фона</span></div>
-              <ColorChips value={eff.bg} onChange={c => setBg({...eff, bg: c})}/>
-            </div>
-          </>
+          <BlocksEditor eff={eff} setBg={setBg}/>
         )}
       </div>
     </>
@@ -475,6 +498,140 @@ function TabTemplates({ apply, content, presetId }) {
             </div>
           ))}
         </div>
+      </div>
+    </>
+  );
+}
+
+/* ============================================================
+   Blocks constructor — add / select / drag / recolor / delete
+   ============================================================ */
+const BLOCK_PALETTE = [
+  '#5552E0','#F2C84B','#E2231A','#16A34A','#161616','#FFFFFF',
+  '#FFB1A5','#9D9AFF','#1F3D2E','#C9B66E','#3B5BDB','#8B89F7',
+];
+
+function BlocksEditor({ eff, setBg }) {
+  const shapes = eff.shapes || [];
+  const [sel, setSel] = useState(0);
+  const stageRef = useRef(null);
+  // refs so the once-attached drag listener always reads the latest data
+  const dragRef = useRef(null);
+  const shapesRef = useRef(shapes);
+  const effRef = useRef(eff);
+  const setBgRef = useRef(setBg);
+  shapesRef.current = shapes;
+  effRef.current = eff;
+  setBgRef.current = setBg;
+
+  const setShapes = (next) => setBg({ ...eff, shapes: next });
+  const updateShape = (i, patch) => {
+    const next = shapes.slice();
+    next[i] = { ...next[i], ...patch };
+    setShapes(next);
+  };
+  const addShape = (kind) => {
+    const base = kind === 'circle'
+      ? { x:35, y:30, w:30, h:30, color:'#5552E0', r:'circle' }
+      : { x:25, y:35, w:50, h:30, color:'#F2C84B', r:6 };
+    const next = shapes.concat([base]);
+    setShapes(next);
+    setSel(next.length - 1);
+  };
+  const removeShape = (i) => {
+    const next = shapes.slice(); next.splice(i, 1);
+    setShapes(next);
+    setSel(Math.max(0, i - 1));
+  };
+
+  const onDown = (i) => (e) => {
+    e.stopPropagation();
+    setSel(i);
+    const rect = stageRef.current.getBoundingClientRect();
+    const s = shapes[i];
+    const sxPx = (s.x / 100) * rect.width;
+    const syPx = (s.y / 100) * rect.height;
+    dragRef.current = { i, dx: e.clientX - sxPx, dy: e.clientY - syPx };
+  };
+
+  useEffect(() => {
+    const onMove = (e) => {
+      const d = dragRef.current;
+      if (!d) return;
+      const rect = stageRef.current.getBoundingClientRect();
+      const s = shapesRef.current[d.i];
+      if (!s) return;
+      let x = ((e.clientX - d.dx) / rect.width) * 100;
+      let y = ((e.clientY - d.dy) / rect.height) * 100;
+      x = Math.max(0, Math.min(100 - s.w, x));
+      y = Math.max(0, Math.min(100 - s.h, y));
+      const next = shapesRef.current.slice();
+      next[d.i] = { ...s, x, y };
+      setBgRef.current({ ...effRef.current, shapes: next });
+    };
+    const onUp = () => { dragRef.current = null; };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, []);
+
+  const cur = shapes[sel];
+
+  return (
+    <>
+      <div className="field">
+        <div className="field-label">
+          <span>Конструктор фигур</span>
+          <span className="val">{shapes.length} шт.</span>
+        </div>
+        <div className="blocks-mini" ref={stageRef} style={{background: eff.bg}}>
+          {shapes.map((s, i) => (
+            <div key={i}
+              className={'lay' + (i === sel ? ' sel' : '')}
+              onMouseDown={onDown(i)}
+              style={{
+                left:`${s.x}%`, top:`${s.y}%`, width:`${s.w}%`, height:`${s.h}%`,
+                background:s.color, borderRadius: s.r === 'circle' ? '50%' : (s.r||0)+'px',
+                transform: s.rot ? `rotate(${s.rot}deg)` : 'none',
+                userSelect:'none',
+              }}/>
+          ))}
+        </div>
+        <div className="blocks-pal">
+          <button onClick={() => addShape('circle')}><Icon name="plus" sm/> Круг</button>
+          <button onClick={() => addShape('rect')}><Icon name="plus" sm/> Прямоугольник</button>
+          <button onClick={() => cur && removeShape(sel)}
+            disabled={!cur} style={{marginLeft:'auto', opacity: cur ? 1 : 0.4}}>
+            Удалить
+          </button>
+        </div>
+      </div>
+
+      {cur && (
+        <>
+          <div className="field">
+            <div className="field-label"><span>Цвет фигуры</span></div>
+            <ColorChips value={cur.color} onChange={c => updateShape(sel, {color: c})}/>
+          </div>
+          <Slider label="Ширина" value={cur.w} onChange={v => updateShape(sel, {w: v})}
+            min={5} max={100} step={1} suffix="%"/>
+          <Slider label="Высота" value={cur.h} onChange={v => updateShape(sel, {h: v})}
+            min={5} max={100} step={1} suffix="%"/>
+          <Slider label="Поворот" value={cur.rot||0} onChange={v => updateShape(sel, {rot: v})}
+            min={-180} max={180} step={1} suffix="°"/>
+          {cur.r !== 'circle' && (
+            <Slider label="Скругление" value={cur.r||0} onChange={v => updateShape(sel, {r: v})}
+              min={0} max={50} step={1} suffix="px"/>
+          )}
+        </>
+      )}
+
+      <div className="field">
+        <div className="field-label"><span>Цвет фона</span></div>
+        <ColorChips value={eff.bg} onChange={c => setBg({...eff, bg: c})}/>
       </div>
     </>
   );

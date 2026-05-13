@@ -10,6 +10,15 @@ const DEFAULT_CONTENT = {
   subtitle: 'Как маленькие студии меняют большой рынок',
 };
 
+const DEFAULT_DECO = {
+  brand: 'BEAUTICARD',
+  issue: '№ 24',
+  date: 'МАЙ · 2026',
+  badge: 'НОВОЕ',
+  tagline: 'ДИЗАЙН · КУЛЬТУРА · ТЕХНО',
+  readTime: 'ЧТЕНИЕ · 8 МИН',
+};
+
 const TABS = [
   { id:'style',    label:'Стиль' },
   { id:'text',     label:'Текст' },
@@ -25,6 +34,7 @@ function App() {
   const [presetId, setPresetId] = useState('magazine');
   const [aspect, setAspect] = useState('3:4');
   const [content, setContent] = useState(DEFAULT_CONTENT);
+  const [deco, setDeco] = useState(DEFAULT_DECO);
   const [bgOverride, setBgOverride] = useState(null);
   const [textOverrides, setTextOverrides] = useState({});
   const [layoutOverride, setLayoutOverride] = useState({});
@@ -37,7 +47,7 @@ function App() {
   const [histIdx, setHistIdx] = useState(0);
 
   function snapshot() {
-    return JSON.stringify({ presetId, aspect, content, bgOverride, textOverrides, layoutOverride });
+    return JSON.stringify({ presetId, aspect, content, deco, bgOverride, textOverrides, layoutOverride });
   }
 
   // Track significant changes into history (debounced-ish)
@@ -54,7 +64,7 @@ function App() {
     }, 350);
     return () => clearTimeout(t);
   // eslint-disable-next-line
-  }, [presetId, aspect, content, bgOverride, textOverrides, layoutOverride]);
+  }, [presetId, aspect, content, deco, bgOverride, textOverrides, layoutOverride]);
 
   function describeChange(prev, cur) {
     if (!prev) return 'Изменение';
@@ -76,6 +86,7 @@ function App() {
     try {
       const s = JSON.parse(snap);
       setPresetId(s.presetId); setAspect(s.aspect); setContent(s.content);
+      if (s.deco) setDeco(s.deco);
       setBgOverride(s.bgOverride); setTextOverrides(s.textOverrides);
       setLayoutOverride(s.layoutOverride);
     } catch {}
@@ -176,6 +187,7 @@ function App() {
   function applyTemplate(t) {
     setPresetId(t.presetId);
     setContent(t.content);
+    setDeco(t.deco ? { ...DEFAULT_DECO, ...t.deco } : DEFAULT_DECO);
     setTextOverrides({});
     setLayoutOverride({});
     setBgOverride(null);
@@ -284,6 +296,7 @@ function App() {
                 aspect={aspect}
                 presetId={presetId}
                 content={content}
+                deco={deco}
                 overrides={textOverrides}
                 bgOverride={bgOverride}
                 layoutOverride={layoutOverride}
@@ -343,7 +356,7 @@ function App() {
           </div>
           <div className="panel-body">
             {tab === 'style' && <TabStyle presetId={presetId} setPresetId={setPresetId} content={content}/>}
-            {tab === 'text' && <TabText content={content} setContent={setContent}/>}
+            {tab === 'text' && <TabText content={content} setContent={setContent} deco={deco} setDeco={setDeco} presetId={presetId}/>}
             {tab === 'type' && <TabTypography presetId={presetId}
               overrides={textOverrides} setOverrides={setTextOverrides}
               layoutOverride={layoutOverride} setLayoutOverride={setLayoutOverride}/>}
